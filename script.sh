@@ -2,13 +2,14 @@
 
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 folder_path file_list.txt output_found.txt"
+    echo "Usage: $0 folder_path file_list.txt found_files.txt"
     exit 1
 fi
 
 folder_path="$1"
 file_list="$2"
-output_found="$3"
+found_files="$3"
+not_found_files="not_found_files.txt"
 
 # Check if the folder exists
 if [ ! -d "$folder_path" ]; then
@@ -22,24 +23,17 @@ if [ ! -e "$file_list" ]; then
     exit 1
 fi
 
-# Flag to check if any file is not found
-not_found_flag=false
-
-# Create an empty output file
-> "$output_found"
+# Create an empty file for found and not found files
+> "$found_files"
+> "$not_found_files"
 
 # Iterate through each file in the list and search in the folder
 while IFS= read -r filename; do
     if [ -e "$folder_path/$filename" ]; then
         echo "File '$filename' found in '$folder_path'"
-        echo "$filename" >> "$output_found"
+        echo "$filename" >> "$found_files"
     else
-        echo "File '$filename' not found in '$folder_path' <<< NOT FOUND"
-        not_found_flag=true
+        echo "File '$filename' not found in '$folder_path'"
+        echo "$filename" >> "$not_found_files"
     fi
 done < "$file_list"
-
-# Exit with a non-zero status if any file is not found
-if [ "$not_found_flag" = true ]; then
-    exit 2
-fi
